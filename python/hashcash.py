@@ -4,7 +4,7 @@ Module to generate and validate HashCash stamps.
 
 """
 
-__author__ = 'per'
+__author__ = 'prussell'
 
 
 from hashlib import sha1
@@ -28,29 +28,30 @@ char_map = {'0' : '0000',
             '7' : '0111',
             '8' : '1000',
             '9' : '1001',
-            'A' : '1010',
-            'B' : '1011',
-            'C' : '1100',
-            'D' : '1101',
-            'E' : '1110',
-            'F' : '1111'}
+            'a' : '1010',
+            'b' : '1011',
+            'c' : '1100',
+            'd' : '1101',
+            'e' : '1110',
+            'f' : '1111'}
 
 
 rc_len = len(rand_chars)
 
+def validate(nbits, stamp, encoding='utf-8'):
 
-def verify(nbits, stamp):
-
+    encoded = stamp.encode(encoding)
+    
     if nbits < 32:
-        val = int(sha1(stamp).hexdigest()[0:8], base=16)
+        val = int(sha1(encoded).hexdigest()[0:8], base=16)
         return val <= (0xFFFFFFFF >> nbits)
 
     else:
-        val = ''.join(char_map[x] for x in sha1(stamp).hexdigest()[:int(ceil(float(nbits)/4))])
+        val = ''.join(char_map[x] for x in sha1(encoded).hexdigest()[:int(ceil(float(nbits)/4))])
         return val.startswith(''.join('0' for x in range(0, nbits)))
 
 
-def generate(nbits, resource):
+def generate(nbits, resource, encoding='utf-8'):
     # ver:bits:date:resource:[ext]:rand:counter
     ver = 1
     bits = nbits
@@ -63,7 +64,7 @@ def generate(nbits, resource):
     while result is None:
         stamp = ":".join(str(elem) for elem in [ver, bits, date_str, ext, rand, counter])
 
-        if verify(nbits, stamp):
+        if validate(nbits, stamp, encoding=encoding):
             result = stamp
             break
 
@@ -79,13 +80,13 @@ if __name__ == "__main__":
 
     parser.add_argument("NBITS", type=int, default=15, help="Number of leading zeroes in a stamp")
     parser.add_argument("RESOURCE", help="The resource string to use in the stamp. Ex: email address, ip address, etc")
-    parser.add_argument('-v', '--verify', action='store_true', help="Verify RESOURCE as a HashCash stamp")
+    parser.add_argument('-v', '--validate', action='store_true', help="Validate RESOURCE as a HashCash stamp")
     
     args = parser.parse_args()
 
-    action = 'generate'
-    
-    if args.verify:
-        action = 'verify'
+    func = generate
 
-    print(locals()[action](args.NBITS, args.RESOURCE))
+    if args.validate:
+        func = validate
+    
+    print(func(args.NBITS, args.RESOURCE))
