@@ -6,7 +6,6 @@ Module to generate and validate HashCash stamps.
 
 __author__ = 'prussell'
 
-
 from hashlib import sha1
 from datetime import datetime
 from random import randint
@@ -38,20 +37,20 @@ char_map = {'0' : '0000',
 
 rc_len = len(rand_chars)
 
-def validate(nbits, stamp, encoding='utf-8'):
+min_bits = 0
+max_bits = 63
+default_bits = 15
+
+def validate(nbits : int, stamp : str, encoding : str ='utf-8') -> bool:
+    if nbits < min_bits or nbits > max_bits:
+        raise ValueError("Param 'nbits' must be in range [0, 63], but is {}".format(nbits))
 
     encoded = stamp.encode(encoding)
     
-    if nbits < 32:
-        val = int(sha1(encoded).hexdigest()[0:8], base=16)
-        return val <= (0xFFFFFFFF >> nbits)
+    val = int(sha1(encoded).hexdigest()[0:16], base=16)
+    return val <= (0xFFFFFFFFFFFFFFFF >> nbits)
 
-    else:
-        val = ''.join(char_map[x] for x in sha1(encoded).hexdigest()[:int(ceil(float(nbits)/4))])
-        return val.startswith(''.join('0' for x in range(0, nbits)))
-
-
-def generate(nbits, resource, encoding='utf-8'):
+def generate(nbits : int, resource : str, encoding : str ='utf-8') -> str:
     # ver:bits:date:resource:[ext]:rand:counter
     ver = 1
     bits = nbits
@@ -78,7 +77,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
 
-    parser.add_argument("NBITS", type=int, default=15, help="Number of leading zeroes in a stamp")
+    parser.add_argument("NBITS", type=int, default=default_bits, help="Number of leading zeroes in a stamp", choices=range(max_bits+1))
     parser.add_argument("RESOURCE", help="The resource string to use in the stamp. Ex: email address, ip address, etc")
     parser.add_argument('-v', '--validate', action='store_true', help="Validate RESOURCE as a HashCash stamp")
     
