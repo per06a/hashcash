@@ -1,0 +1,15 @@
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+version = '1.0'
+jar {
+    manifest {
+    attributes 'Implementation-Title': 'HashCash',
+    'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+}

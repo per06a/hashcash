@@ -20,6 +20,8 @@ lib64
 __pycache__
 **/__pycache__
 **/.pytest_cache
+java/build
+java/.gradle
 
 # Installer logs
 pip-log.txt
@@ -36,3 +38,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# emacs
+*~

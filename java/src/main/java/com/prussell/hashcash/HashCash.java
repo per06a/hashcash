@@ -1,4 +1,4 @@
-package com.per06a.hashcashlib;
+package com.prussell.hashcash;
 
 import java.security.DigestException;
 import java.security.MessageDigest;
