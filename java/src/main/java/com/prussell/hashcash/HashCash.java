@@ -13,7 +13,7 @@ import java.util.TimeZone;
 /***
  * Generate and validate HashCash stamps.
  * 
- * @author per06a
+ * @author prussell
  * 
  */
 public class HashCash {
@@ -42,12 +42,10 @@ public class HashCash {
 		charBinStrMap.put('F', "1111");
 	}
 
-	private static char[] randChars = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-			'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-			'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-			'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-			'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7',
-			'8', '9', '=', '/', '+' };
+	private static char[] randChars = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+			'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+			'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5',
+			'6', '7', '8', '9', '=', '/', '+' };
 
 	private static String genRandStr() {
 
@@ -86,9 +84,8 @@ public class HashCash {
 	 * @throws NoSuchAlgorithmException
 	 * @throws DigestException
 	 */
-	public static boolean valid(String stamp) throws NoSuchAlgorithmException,
-			DigestException {
-		return valid(Integer.parseInt(stamp.split(":")[1]), stamp);
+	public static boolean isValid(String stamp) throws NoSuchAlgorithmException, DigestException {
+		return validate(Integer.parseInt(stamp.split(":")[1]), stamp);
 	}
 
 	/***
@@ -103,12 +100,10 @@ public class HashCash {
 	 * @throws NoSuchAlgorithmException
 	 * @throws DigestException
 	 */
-	public static boolean valid(int numBits, String stamp)
-			throws NoSuchAlgorithmException, DigestException {
+	public static boolean validate(int numBits, String stamp) throws NoSuchAlgorithmException, DigestException {
 
 		if (numBits > MAX_BITS) {
-			throw new IllegalArgumentException(String.format(
-					"Parameter numBits has a maximum size of %d", MAX_BITS));
+			throw new IllegalArgumentException(String.format("Parameter numBits has a maximum size of %d", MAX_BITS));
 		}
 
 		boolean result = false;
@@ -122,29 +117,27 @@ public class HashCash {
 		md.digest(hashBuff, 0, hashBuff.length);
 
 		/*
-		 * Have to use >>>, which causes zero-fill. Java's all signed, so the
-		 * default is extend by the leading bit.
+		 * Have to use >>>, which causes zero-fill. Java's all signed, so the default is
+		 * extend by the leading bit.
 		 */
 
 		if (numBits < Integer.SIZE) {
 			/*
-			 * The efficient solution, construct an integer representation of
-			 * the stamp. Then compare it against a bitmask with the required
-			 * number of leading zeroes.
+			 * The efficient solution, construct an integer representation of the stamp.
+			 * Then compare it against a bitmask with the required number of leading zeroes.
 			 */
 			int mask = 0xFFFFFFFF >>> numBits;
-			int val = hashBuff[0] << 24 | hashBuff[1] << 16 | hashBuff[2] << 8
-					| hashBuff[3];
+			int val = hashBuff[0] << 24 | hashBuff[1] << 16 | hashBuff[2] << 8 | hashBuff[3];
 
 			if ((mask | ~val) == 0xFFFFFFFF) {
 				result = true;
 			}
 		} else {
 			/*
-			 * Inefficient way of computing the stamp by creating the necessary
-			 * bitstring, then counting the number of leading zeroes. This
-			 * involves a lot of allocation and comparison, so is saved for the
-			 * rarer case where we want more than 31 leading zeroes.
+			 * Inefficient way of computing the stamp by creating the necessary bitstring,
+			 * then counting the number of leading zeroes. This involves a lot of allocation
+			 * and comparison, so is saved for the rarer case where we want more than 31
+			 * leading zeroes.
 			 */
 			boolean nonZeroCharFound = false;
 			char[] chars = toBinStr(hashBuff).toCharArray();
@@ -165,24 +158,21 @@ public class HashCash {
 	 * Generate a valid HashCash stamp.
 	 * 
 	 * @param numBits
-	 *            Number of leading zeroes for the stamp. Increases the amount
-	 *            of time to find the stamp as a function of pow(2, numBits).
-	 *            The computation is CPU-bound, so faster clock speeds means
-	 *            less real time to compute a stamp (at the cost of more
-	 *            energy).
+	 *            Number of leading zeroes for the stamp. Increases the amount of
+	 *            time to find the stamp as a function of pow(2, numBits). The
+	 *            computation is CPU-bound, so faster clock speeds means less real
+	 *            time to compute a stamp (at the cost of more energy).
 	 * @param resourceStr
-	 *            The client-defined resource string. Could be an email address,
-	 *            ip address, etc.
+	 *            The client-defined resource string. Could be an email address, ip
+	 *            address, etc.
 	 * @return A valid HashCash stamp.
 	 * @throws NoSuchAlgorithmException
 	 * @throws DigestException
 	 */
-	public static String generate(int numBits, String resourceStr)
-			throws NoSuchAlgorithmException, DigestException {
+	public static String generate(int numBits, String resourceStr) throws NoSuchAlgorithmException, DigestException {
 
 		if (numBits > MAX_BITS) {
-			throw new IllegalArgumentException(String.format(
-					"Parameter numBits has a maximum size of %d", MAX_BITS));
+			throw new IllegalArgumentException(String.format("Parameter numBits has a maximum size of %d", MAX_BITS));
 		}
 
 		/*
@@ -205,10 +195,10 @@ public class HashCash {
 		int counter = 1;
 
 		while (result == null) {
-			String stamp = String.format("%s:%s:%s:%s:%s:%s:%s", version,
-					numBits, dateStr, resourceStr, ext, randStr, counter);
+			String stamp = String.format("%s:%s:%s:%s:%s:%s:%s", version, numBits, dateStr, resourceStr, ext, randStr,
+					counter);
 
-			if (valid(numBits, stamp)) {
+			if (validate(numBits, stamp)) {
 				result = stamp;
 				break;
 			}
@@ -217,18 +207,6 @@ public class HashCash {
 		}
 
 		return result;
-	}
-
-	public static void main(String[] args) {
-
-		try {
-			String stamp = generate(17, "0xDEADBEEF");
-			System.out.println(stamp);
-		} catch (NoSuchAlgorithmException | DigestException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 
 }
