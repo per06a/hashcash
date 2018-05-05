@@ -38,7 +38,7 @@ char_map = {'0' : '0000',
 rc_len = len(rand_chars)
 
 min_bits = 0
-max_bits = 63
+max_bits = 31
 default_bits = 15
 
 def validate(nbits : int, stamp : str, encoding : str ='utf-8') -> bool:
@@ -46,9 +46,9 @@ def validate(nbits : int, stamp : str, encoding : str ='utf-8') -> bool:
         raise ValueError("Param 'nbits' must be in range [0, 63], but is {}".format(nbits))
 
     encoded = stamp.encode(encoding)
-    
-    val = int(sha1(encoded).hexdigest()[0:16], base=16)
-    return val <= (0xFFFFFFFFFFFFFFFF >> nbits)
+
+    val = int(sha1(encoded).hexdigest()[0:8], base=16)
+    return val <= (0xFFFFFFFF >> nbits)
 
 def generate(nbits : int, resource : str, encoding : str ='utf-8') -> str:
     # ver:bits:date:resource:[ext]:rand:counter
