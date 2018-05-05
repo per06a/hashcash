@@ -8,7 +8,7 @@
 `./gradlew clean build`
 
 ## Usage
-### From REPL/scripts
+### From Java files
 ```
 import com.prussell.hashcash.HashCash;
 
