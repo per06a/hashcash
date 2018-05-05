@@ -38,8 +38,11 @@ char_map = {'0' : '0000',
 rc_len = len(rand_chars)
 
 min_bits = 0
-max_bits = 31
+max_bits = 128
 default_bits = 15
+
+def is_valid(stamp : str) -> bool:
+    return validate(int(stamp.split(':')[1]), stamp)
 
 def validate(nbits : int, stamp : str, encoding : str ='utf-8') -> bool:
     if nbits < min_bits or nbits > max_bits:
@@ -47,8 +50,13 @@ def validate(nbits : int, stamp : str, encoding : str ='utf-8') -> bool:
 
     encoded = stamp.encode(encoding)
 
-    val = int(sha1(encoded).hexdigest()[0:8], base=16)
-    return val <= (0xFFFFFFFF >> nbits)
+    if nbits < 32:
+        val = int(sha1(encoded).hexdigest()[0:8], base=16)
+        return val <= (0xFFFFFFFF >> nbits)
+
+    else:
+        val = ''.join(char_map[x] for x in sha1(encoded).hexdigest()[:int(ceil(float(nbits)/4))])
+        return val.startswith(''.join('0' for x in range(0, nbits)))
 
 def generate(nbits : int, resource : str, encoding : str ='utf-8') -> str:
     # ver:bits:date:resource:[ext]:rand:counter

@@ -24,4 +24,11 @@ class HashcashTests(unittest.TestCase):
             hashcash.validate(-1, 'blah')
 
         with self.assertRaises(ValueError):
-            hashcash.validate(64, 'blah')
+            hashcash.validate(3000, 'blah')
+
+    def test_validate_known_stamps(self):
+
+        assert(hashcash.is_valid("1:48:110416:etienne@cri.fr:::000A2F00000063BF012"))
+        assert(hashcash.is_valid("1:44:070217:foo::xSi0bPjoswUh6h1Y:TMNI7"))
+        assert(hashcash.is_valid("1:42:060922:When I think of all the good times that I've wasted ...::UXkz/DsCCgfvBVtH:00000EF7+j"))
+        assert(hashcash.is_valid("1:40:051222:foo@bar.org::Cu2iqc4SmotZ7MRR:0000214c3J"))
