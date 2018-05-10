@@ -16,7 +16,7 @@ Python. Any version >= 3.5 works.
 import hashcash
 
 stamp = hashcash.generate(15, "some resource string to hash")
-hashcash.validate(15, stamp)
+hashcash.is_valid(stamp)
 ```
 
 ### From the command line
