@@ -32,3 +32,4 @@ class HashcashTests(unittest.TestCase):
         assert(hashcash.is_valid("1:44:070217:foo::xSi0bPjoswUh6h1Y:TMNI7"))
         assert(hashcash.is_valid("1:42:060922:When I think of all the good times that I've wasted ...::UXkz/DsCCgfvBVtH:00000EF7+j"))
         assert(hashcash.is_valid("1:40:051222:foo@bar.org::Cu2iqc4SmotZ7MRR:0000214c3J"))
+        assert(hashcash.is_valid("1:15:20180507033101:0xdeadbeef::yPiG6MTGZM:447651"))

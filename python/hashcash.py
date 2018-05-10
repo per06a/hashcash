@@ -38,7 +38,8 @@ char_map = {'0' : '0000',
 rc_len = len(rand_chars)
 
 min_bits = 0
-max_bits = 128
+# Max number of bits for SHA-1 stamps
+max_bits = 160
 default_bits = 15
 
 def is_valid(stamp : str) -> bool:
@@ -46,17 +47,22 @@ def is_valid(stamp : str) -> bool:
 
 def validate(nbits : int, stamp : str, encoding : str ='utf-8') -> bool:
     if nbits < min_bits or nbits > max_bits:
-        raise ValueError("Param 'nbits' must be in range [0, 63], but is {}".format(nbits))
+        raise ValueError("Param 'nbits' must be in range [0, 160), but is {}".format(nbits))
 
-    encoded = stamp.encode(encoding)
+    i = 0
+    total = 0
+    N = int(nbits/8)
+    hashed = sha1(stamp.encode(encoding)).digest()
 
-    if nbits < 32:
-        val = int(sha1(encoded).hexdigest()[0:8], base=16)
-        return val <= (0xFFFFFFFF >> nbits)
+    while i < N:
+        total |= hashed[i]
+        i += 1
 
-    else:
-        val = ''.join(char_map[x] for x in sha1(encoded).hexdigest()[:int(ceil(float(nbits)/4))])
-        return val.startswith(''.join('0' for x in range(0, nbits)))
+    remainder = nbits % 8
+    if remainder != 0:
+        total |= hashed[i] >> (8 - remainder)
+
+    return total == 0
 
 def generate(nbits : int, resource : str, encoding : str ='utf-8') -> str:
     # ver:bits:date:resource:[ext]:rand:counter
@@ -69,7 +75,7 @@ def generate(nbits : int, resource : str, encoding : str ='utf-8') -> str:
 
     result = None
     while result is None:
-        stamp = ":".join(str(elem) for elem in [ver, bits, date_str, ext, rand, counter])
+        stamp = ":".join(str(elem) for elem in [ver, bits, date_str, resource, ext, rand, counter])
 
         if validate(nbits, stamp, encoding=encoding):
             result = stamp
