@@ -1,5 +1,5 @@
 
-# HashCash module for Python 3
+# HashCash library for Java
 
 ## Prerequsites
 `Java 8`
